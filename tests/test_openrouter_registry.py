@@ -104,6 +104,8 @@ class TestOpenRouterModelRegistry:
             ("deepseek", "deepseek/deepseek-r1-0528"),
             ("mistral", "mistralai/mistral-large-2411"),
             # New models added in 9.9.0
+            ("gpt5", "openai/gpt-5.4"),
+            ("gpt5.4", "openai/gpt-5.4"),
             ("gpt5pro", "openai/gpt-5.4-pro"),
             ("codex-5.3", "openai/gpt-5.3-codex"),
             ("devstral", "mistralai/devstral-2512"),
