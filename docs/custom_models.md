@@ -59,7 +59,7 @@ The curated defaults in `conf/openrouter_models.json` include popular entries su
 | `flash` | `google/gemini-2.5-flash` | Ultra-fast Gemini with vision |
 | `gpt5`, `gpt5.4` | `openai/gpt-5.4` | Unified frontier model (1M context, 128K output). `gpt5.0` → 5.0 |
 | `gpt5pro` | `openai/gpt-5.4-pro` | Enhanced reasoning variant (1M context). `gpt5.2-pro` → 5.2 Pro |
-| `codex-5.3`, `gpt5.3-codex` | `openai/gpt-5.3-codex` | Latest agentic coding model (Responses API) |
+| `codex`, `codex-5.3` | `openai/gpt-5.3-codex` | Latest agentic coding model (Responses API). `codex-5.0` → 5.0 |
 | `gpt5.2`, `gpt-5.2`, `5.2` | `openai/gpt-5.2` | Flagship GPT-5.2 with reasoning and vision |
 | `gpt5.1-codex`, `codex-5.1` | `openai/gpt-5.1-codex` | Agentic coding specialization (Responses API) |
 | `codex-mini` | `openai/gpt-5.1-codex-mini` | Cost-efficient Codex variant with streaming |

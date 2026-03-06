@@ -107,6 +107,7 @@ class TestOpenRouterModelRegistry:
             ("gpt5", "openai/gpt-5.4"),
             ("gpt5.4", "openai/gpt-5.4"),
             ("gpt5pro", "openai/gpt-5.4-pro"),
+            ("codex", "openai/gpt-5.3-codex"),
             ("codex-5.3", "openai/gpt-5.3-codex"),
             ("devstral", "mistralai/devstral-2512"),
             ("qwen", "qwen/qwen3.5-397b-a17b"),
