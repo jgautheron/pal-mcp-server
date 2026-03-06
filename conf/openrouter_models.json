@@ -496,7 +496,7 @@
       "supports_function_calling": true,
       "supports_images": true,
       "max_image_size_mb": 20.0,
-      "supports_temperature": true,
+      "supports_temperature": false,
       "temperature_constraint": "fixed",
       "use_openai_response_api": true,
       "default_reasoning_effort": "high",
@@ -617,13 +617,13 @@
         "m2.5"
       ],
       "context_window": 196608,
-      "max_output_tokens": 196608,
+      "max_output_tokens": 32768,
       "supports_extended_thinking": false,
       "supports_json_mode": true,
       "supports_function_calling": true,
       "supports_images": false,
       "max_image_size_mb": 0.0,
-      "description": "MiniMax M2.5 - SWE-Bench 80.2%, optimized for agent workflows and real-world productivity",
+      "description": "MiniMax M2.5 - SWE-Bench 80.2%, optimized for agent workflows and real-world productivity (API allows up to 196K output)",
       "intelligence_score": 16
     }
   ]
