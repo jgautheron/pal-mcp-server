@@ -472,8 +472,20 @@ class GeminiModelProvider(RegistryBackedProviderMixin, ModelProvider):
 
         # Helper to find best model from candidates
         def find_best(candidates: list[str]) -> Optional[str]:
-            """Return best model from candidates (sorted for consistency)."""
-            return sorted(candidates, reverse=True)[0] if candidates else None
+            """Return best model from candidates, preferring canonical names."""
+            if not candidates:
+                return None
+
+            # Prefer canonical model names over aliases by checking against the registry.
+            # Sort by: (is_canonical, intelligence_score, name) descending
+            canonical_names = set(self.list_models(include_aliases=False, respect_restrictions=False))
+
+            def sort_key(m: str) -> tuple[bool, int, str]:
+                is_canonical = m in canonical_names
+                score = capability_map[m].intelligence_score if m in capability_map else 0
+                return (is_canonical, score, m)
+
+            return sorted(candidates, key=sort_key, reverse=True)[0]
 
         if category == ToolModelCategory.EXTENDED_REASONING:
             # For extended reasoning, prefer models with thinking support
