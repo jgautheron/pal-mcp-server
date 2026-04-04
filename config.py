@@ -25,7 +25,7 @@ __author__ = "Fahad Gilani"
 # This should be a stable, high-performance model suitable for code analysis
 # Can be overridden by setting DEFAULT_MODEL environment variable
 # Special value "auto" means Claude should pick the best model for each task
-DEFAULT_MODEL = get_env("DEFAULT_MODEL", "auto") or "auto"
+DEFAULT_MODEL = get_env("DEFAULT_MODEL", "gpt-5.4") or "gpt-5.4"
 
 # Auto mode detection - when DEFAULT_MODEL is "auto", Claude picks the model
 IS_AUTO_MODE = DEFAULT_MODEL.lower() == "auto"
