@@ -732,7 +732,7 @@ DTOClass ──uses──→ [TARGET_CLASS] ──uses──→ EntityClass
         """Tracer-specific expert analysis skip status."""
         return "skipped_by_tool_design"
 
-    def store_initial_issue(self, step_description: str):
+    def store_initial_issue(self, step_description: str, continuation_id: str | None = None):  # noqa: ARG002
         """Store initial tracing description."""
         self.initial_tracing_description = step_description
 
