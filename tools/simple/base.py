@@ -476,6 +476,9 @@ class SimpleTool(BaseTool):
             if model_response.content:
                 raw_text = model_response.content
 
+                # Filter out already-provided files from files_required_to_continue responses
+                raw_text = self._filter_duplicate_file_requests(raw_text)
+
                 # Create model info for conversation tracking
                 model_info = {
                     "provider": provider,
@@ -842,7 +845,8 @@ class SimpleTool(BaseTool):
             )
             self._actually_processed_files = processed_files
             if file_content:
-                user_content = f"{user_content}\n\n=== {file_context_title} ===\n{file_content}\n=== END CONTEXT ===="
+                manifest = self._build_file_manifest(processed_files)
+                user_content = f"{user_content}\n\n=== {file_context_title} ===\n{file_content}\n{manifest}\n=== END CONTEXT ===="
 
         # Add standardized web search guidance
         websearch_instruction = self.get_websearch_instruction(self.get_websearch_guidance())
@@ -857,6 +861,26 @@ class SimpleTool(BaseTool):
 Please provide a thoughtful, comprehensive response:"""
 
         return full_prompt
+
+    @staticmethod
+    def _build_file_manifest(processed_files: list[str]) -> str:
+        """
+        Build a manifest of already-provided files to prevent models from re-requesting them.
+
+        When models see file content embedded in long contexts, they sometimes lose track
+        of which files were already provided and respond with files_required_to_continue
+        for files that are already present. This manifest makes the provided files explicit.
+        """
+        if not processed_files:
+            return ""
+        file_list = "\n".join(f"  - {f}" for f in processed_files)
+        return (
+            "\n=== FILES ALREADY PROVIDED ===\n"
+            "The following files have been fully embedded above. "
+            "Do NOT request these via files_required_to_continue:\n"
+            f"{file_list}\n"
+            "=== END FILE LIST ==="
+        )
 
     def get_prompt_content_for_size_validation(self, user_content: str) -> str:
         """

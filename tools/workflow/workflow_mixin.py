@@ -444,7 +444,22 @@ class BaseWorkflowMixin(ABC):
         Add file content to the expert context.
         Override this to customize how files are added to the context.
         """
-        return f"{expert_context}\n\n=== ESSENTIAL FILES ===\n{file_content}\n=== END ESSENTIAL FILES ==="
+        manifest = self._build_expert_file_manifest()
+        return f"{expert_context}\n\n=== ESSENTIAL FILES ===\n{file_content}\n{manifest}\n=== END ESSENTIAL FILES ==="
+
+    def _build_expert_file_manifest(self) -> str:
+        """Build a manifest of files provided in expert analysis context."""
+        processed_files = self.get_actually_processed_files()
+        if not processed_files:
+            return ""
+        file_list = "\n".join(f"  - {f}" for f in processed_files)
+        return (
+            "\n=== FILES ALREADY PROVIDED ===\n"
+            "The following files have been fully embedded above. "
+            "Do NOT request these via files_required_to_continue:\n"
+            f"{file_list}\n"
+            "=== END FILE LIST ==="
+        )
 
     # ================================================================================
     # Context-Aware File Embedding - Core Implementation
@@ -1522,7 +1537,9 @@ class BaseWorkflowMixin(ABC):
             )
 
             if model_response.content:
-                content = model_response.content.strip()
+                # Filter out already-provided files from files_required_to_continue responses
+                filtered_content = self._filter_duplicate_file_requests(model_response.content)
+                content = filtered_content.strip()
 
                 # Try to extract JSON from markdown code blocks if present
                 if "```json" in content or "```" in content:

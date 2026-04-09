@@ -1600,6 +1600,81 @@ When recommending searches, be specific about what information you need and why 
         logger.debug(f"Image validation passed: {len(images)} images, {total_size_mb:.1f}MB total")
         return None
 
+    def _filter_duplicate_file_requests(self, raw_text: str) -> str:
+        """
+        Filter already-provided files from files_required_to_continue responses.
+
+        When a model responds with files_required_to_continue JSON requesting files
+        that were already embedded in the prompt, this method removes those duplicates.
+        If all requested files were already provided, the response is replaced with an
+        instruction to analyze the provided context instead.
+        """
+        import json as _json
+
+        processed_files = getattr(self, "_actually_processed_files", [])
+        if not processed_files:
+            return raw_text
+
+        # Try to parse the response as JSON (may be wrapped in markdown code blocks)
+        text = raw_text.strip()
+        if text.startswith("```"):
+            # Strip markdown code fences
+            lines = text.split("\n")
+            lines = [l for l in lines if not l.strip().startswith("```")]
+            text = "\n".join(lines).strip()
+
+        try:
+            data = _json.loads(text)
+        except (ValueError, _json.JSONDecodeError):
+            return raw_text
+
+        if not isinstance(data, dict) or data.get("status") != "files_required_to_continue":
+            return raw_text
+
+        files_needed = data.get("files_needed", [])
+        if not files_needed:
+            return raw_text
+
+        # Normalize paths for comparison (basename matching + exact matching)
+        provided_basenames = {os.path.basename(f) for f in processed_files}
+        provided_set = set(processed_files)
+
+        truly_needed = []
+        duplicates = []
+        for f in files_needed:
+            if f in provided_set or os.path.basename(f) in provided_basenames:
+                duplicates.append(f)
+            else:
+                truly_needed.append(f)
+
+        if not duplicates:
+            return raw_text
+
+        logger.info(
+            f"[FILE_DEDUP] {self.name}: Filtered {len(duplicates)} already-provided files "
+            f"from files_required_to_continue: {duplicates}"
+        )
+
+        if truly_needed:
+            # Some files are genuinely new — update the request
+            data["files_needed"] = truly_needed
+            data["mandatory_instructions"] = (
+                f"{data.get('mandatory_instructions', '')} "
+                f"(Note: {len(duplicates)} requested file(s) were already provided and have been removed from this list.)"
+            ).strip()
+            return _json.dumps(data)
+
+        # All requested files were already provided — replace with guidance
+        logger.info(
+            f"[FILE_DEDUP] {self.name}: ALL requested files were already provided. "
+            "Replacing files_required_to_continue with analysis instruction."
+        )
+        return (
+            "All the files you requested are already provided in the context above. "
+            "Please re-read the attached file contents and proceed with your analysis "
+            "using the provided context."
+        )
+
     def _parse_response(self, raw_text: str, request, model_info: Optional[dict] = None):
         """Parse response - will be inherited for now."""
         # Implementation inherited from current base.py
